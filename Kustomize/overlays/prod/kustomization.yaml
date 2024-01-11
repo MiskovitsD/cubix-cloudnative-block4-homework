@@ -1,0 +1,10 @@
+namespace: hw4-prod
+commonLabels:
+  training: block4
+resources:
+  - ../../base
+  - namespace.yaml
+  - ingress.yaml
+patches:
+  - path: patch-replicas-backapp.yaml
+  - path: patch-replicas-frontapp.yaml

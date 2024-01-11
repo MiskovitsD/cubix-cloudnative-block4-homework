@@ -1,0 +1,7 @@
+namespace: hw4-test
+commonLabels:
+  training: block4
+resources:
+  - ../../base
+  - namespace.yaml
+  - ingress.yaml
