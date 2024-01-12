@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hw4.fullname" . }}-frontapp
+  labels:
+    {{- include "hw4.labels" . | nindent 4 }}
+    {{- include "hw4.frontapp.podLabels" . | nindent 4 }}
+spec:
+  type: {{ .Values.frontapp.service.type }}
+  ports:
+    - port: {{ .Values.frontapp.service.port }}
+      targetPort: http-frontapp
+      protocol: TCP
+      name: http-frontapp
+  selector:
+    {{- include "hw4.selectorLabels" . | nindent 4 }}
+    {{- include "hw4.frontapp.podLabels" . | nindent 4 }}

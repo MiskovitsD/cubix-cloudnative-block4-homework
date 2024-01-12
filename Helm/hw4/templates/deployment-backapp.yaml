@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hw4.fullname" . }}-backapp
+  labels:
+    {{- include "hw4.labels" . | nindent 4 }}
+    {{- include "hw4.backapp.podLabels" . | nindent 4 }}
+spec:
+  {{- if not .Values.backapp.autoscaling.enabled }}
+  replicas: {{ .Values.backapp.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hw4.selectorLabels" . | nindent 6 }}
+      {{- include "hw4.backapp.podLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.backapp.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hw4.labels" . | nindent 8 }}
+        {{- include "hw4.backapp.podLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hw4.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-backapp
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.backapp.image.repository }}:{{ .Values.backapp.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backapp.image.pullPolicy }}
+          ports:
+            - name: http-backapp
+              containerPort: {{ required "Backapp container's port is required" .Values.backapp.containerPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.backapp.resources | nindent 12 }}
+          {{- with .Values.backapp.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+          - name: APP_DEFAULT_MESSAGE
+            value: {{ .Values.backapp.defaultMessage | default "backapp" }}
+          - name: JAVA_OPTS
+            value: {{ .Values.backapp.javaOpts }}
+          {{- range .Values.backapp.env }}
+          - name: {{ .name }}
+            value: {{ .value | quote }}
+          {{- end }}
+
+      {{- with .Values.backapp.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

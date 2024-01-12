@@ -1,0 +1,46 @@
+{{- if .Values.frontapp.ingress.enabled -}}
+{{- $fullName := printf "%s-%s" (include "hw4.fullname" .) ("frontapp") -}}
+{{- $svcPort := .Values.frontapp.service.port -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "hw4.labels" . | nindent 4 }}
+    {{- include "hw4.frontapp.podLabels" . | nindent 4 }}
+  {{- with .Values.frontapp.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.frontapp.ingress.className }}
+  ingressClassName: {{ .Values.frontapp.ingress.className }}
+  {{- end }}
+  {{- if .Values.frontapp.ingress.tls }}
+  tls:
+    {{- range .Values.frontapp.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.frontapp.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+{{- end }}

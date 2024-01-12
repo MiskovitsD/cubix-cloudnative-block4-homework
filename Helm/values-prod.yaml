@@ -1,0 +1,22 @@
+backapp:
+  replicaCount: 2
+
+  # Testing
+  # defaultMessage: backapp default message
+
+frontapp:
+  replicaCount: 2
+  ingress:
+    enabled: true
+    hosts:
+      - host: application.cubix.localhost
+        paths:
+          - path: /frontapp
+            pathType: Prefix
+
+  # Testing
+  # defaultMessage: frontapp default message
+  # javaOpts: "-Dspring.main.banner-mode=off"
+  # env:
+  #   - name: CUBIX_HOMEWORK
+  #     value: Miskovits Dániel

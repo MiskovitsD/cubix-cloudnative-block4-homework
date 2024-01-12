@@ -1,0 +1,8 @@
+frontapp:
+  ingress:
+    enabled: true
+    hosts:
+      - host: other.cubix.localhost
+        paths:
+          - path: /frontapp
+            pathType: Prefix

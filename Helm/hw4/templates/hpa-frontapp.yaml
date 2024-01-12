@@ -1,0 +1,33 @@
+{{- if .Values.frontapp.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "hw4.fullname" . }}-frontapp
+  labels:
+    {{- include "hw4.labels" . | nindent 4 }}
+    {{- include "hw4.frontapp.podLabels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "hw4.fullname" . }}-frontapp
+  minReplicas: {{ .Values.frontapp.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.frontapp.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.frontapp.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu-frontapp
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.frontapp.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.frontapp.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory-frontapp
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.frontapp.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
